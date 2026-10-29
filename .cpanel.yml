@@ -1,0 +1,5 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/r87351dist/setbv2026.districthub.ro
+    - /bin/cp -R * $DEPLOYPATH
