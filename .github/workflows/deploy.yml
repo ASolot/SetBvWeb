@@ -7,11 +7,17 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger cPanel Deployment
-        uses: pinkasey/cpanel-deploy-action@v1.0.0
-        with:
-          hostname: '${{ secrets.CPANEL_HOSTNAME }}'
-          cpanel_username: '${{ secrets.CPANEL_USERNAME }}'
-          cpanel_token: '${{ secrets.CPANEL_TOKEN }}'
-          repository_root: '${{ secrets.CPANEL_REPO_ROOT }}'
-          branch: 'main'
+      - name: Fetch Latest Changes in cPanel Repository
+        run: |
+          RESPONSE=$(curl -s -X POST "${{ secrets.CPANEL_HOSTNAME }}/execute/VersionControl/update" \
+            -H "Authorization: cpanel ${{ secrets.CPANEL_USERNAME }}:${{ secrets.CPANEL_TOKEN }}" \
+            -d "repository_root=${{ secrets.CPANEL_REPO_ROOT }}" \
+            -d "branch=main")
+          echo "$RESPONSE"
+
+      - name: Execute cPanel Deployment (.cpanel.yml)
+        run: |
+          RESPONSE=$(curl -s -X POST "${{ secrets.CPANEL_HOSTNAME }}/execute/VersionControlDeployment/create" \
+            -H "Authorization: cpanel ${{ secrets.CPANEL_USERNAME }}:${{ secrets.CPANEL_TOKEN }}" \
+            -d "repository_root=${{ secrets.CPANEL_REPO_ROOT }}")
+          echo "$RESPONSE"
